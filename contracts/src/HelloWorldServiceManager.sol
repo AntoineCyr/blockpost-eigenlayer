@@ -14,7 +14,7 @@ import "./IHelloWorldServiceManager.sol";
  * @title Primary entrypoint for procuring services from HelloWorld.
  * @author Eigen Labs, Inc.
  */
-contract HelloWorldServiceManager is 
+contract HelloWorldServiceManager is
     ECDSAServiceManagerBase,
     IHelloWorldServiceManager,
     Pausable
@@ -35,12 +35,14 @@ contract HelloWorldServiceManager is
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
     mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
 
+    // mapping of task message
+    mapping(uint32 => string) public storedTask;
+
     /* MODIFIERS */
     modifier onlyOperator() {
         require(
-            ECDSAStakeRegistry(stakeRegistry).operatorRegistered(msg.sender) 
-            == 
-            true, 
+            ECDSAStakeRegistry(stakeRegistry).operatorRegistered(msg.sender) ==
+                true,
             "Operator must be the caller"
         );
         _;
@@ -59,12 +61,9 @@ contract HelloWorldServiceManager is
         )
     {}
 
-
     /* FUNCTIONS */
     // NOTE: this function creates new task, assigns it a taskId
-    function createNewTask(
-        string memory name
-    ) external {
+    function createNewTask(string memory name) external {
         // create a new task struct
         Task memory newTask;
         newTask.name = name;
@@ -88,8 +87,7 @@ contract HelloWorldServiceManager is
         );
         // check that the task is valid, hasn't been responsed yet, and is being responded in time
         require(
-            keccak256(abi.encode(task)) ==
-                allTaskHashes[referenceTaskIndex],
+            keccak256(abi.encode(task)) == allTaskHashes[referenceTaskIndex],
             "supplied task does not match the one recorded in the contract"
         );
         // some logical checks
@@ -116,7 +114,11 @@ contract HelloWorldServiceManager is
 
     // HELPER
 
-    function operatorHasMinimumWeight(address operator) public view returns (bool) {
-        return ECDSAStakeRegistry(stakeRegistry).getOperatorWeight(operator) >= ECDSAStakeRegistry(stakeRegistry).minimumWeight();
+    function operatorHasMinimumWeight(
+        address operator
+    ) public view returns (bool) {
+        return
+            ECDSAStakeRegistry(stakeRegistry).getOperatorWeight(operator) >=
+            ECDSAStakeRegistry(stakeRegistry).minimumWeight();
     }
 }
