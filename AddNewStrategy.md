@@ -5,6 +5,7 @@ This guide will help you add a new strategy to the Hello World AVS using Foundry
 ### Prerequisites
 
 Before starting, ensure you have the following:
+
 - A development environment set up with Foundry.
 - Access to the EigenLayer contracts and the Hello World AVS contracts.
 - A deployed instance of the Hello World AVS.
@@ -46,7 +47,7 @@ address baseStrategyImplementationAddr = /* Strategy Base Implementation Address
 address strategyManagerAddr = /* Strategy Manager Address */;
 address delegationManagerAddr = /* Delegation Manager Address */;
 address avsDirectoryAddr = /* AVS Directory Address */;
-address helloWorldServiceManagerProxyAddr = /* Hello World Service Manager Proxy Address */;
+address blockpostServiceManagerProxyAddr = /* Hello World Service Manager Proxy Address */;
 address stakeRegistryProxyAddr = /* ECDSA Stake Registry Proxy Address */;
 ```
 
@@ -59,7 +60,7 @@ function run() external {
     ERC20Mock erc20Mock = new ERC20Mock();
     StrategyBaseTVLLimits erc20MockStrategy = _deployStrategy(erc20Mock);
     _whitelistStrategy(erc20MockStrategy);
-    _updateHelloWorldAVS(erc20MockStrategy);
+    _updateBlockpostAVS(erc20MockStrategy);
 }
 ```
 
@@ -113,10 +114,10 @@ function _whitelistStrategy(StrategyBaseTVLLimits erc20MockStrategy) internal {
 #### Update the Hello World AVS
 
 ```solidity
-function _updateHelloWorldAVS(StrategyBaseTVLLimits erc20MockStrategy) internal {
+function _updateBlockpostAVS(StrategyBaseTVLLimits erc20MockStrategy) internal {
     IDelegationManager delegationManager = IDelegationManager(delegationManagerAddr);
     IAVSDirectory avsDirectory = IAVSDirectory(avsDirectoryAddr);
-    HelloWorldServiceManager helloWorldServiceManagerProxy = HelloWorldServiceManager(helloWorldServiceManagerProxyAddr);
+    BlockpostServiceManager blockpostServiceManagerProxy = BlockpostServiceManager(blockpostServiceManagerProxyAddr);
     ECDSAStakeRegistry stakeRegistryProxy = ECDSAStakeRegistry(stakeRegistryProxyAddr);
 
     StrategyParams memory strategyParams = StrategyParams({
@@ -132,7 +133,7 @@ function _updateHelloWorldAVS(StrategyBaseTVLLimits erc20MockStrategy) internal 
     });
 
     stakeRegistryProxy.initialize(
-        address(helloWorldServiceManagerProxy),
+        address(blockpostServiceManagerProxy),
         1,
         quorum
     );

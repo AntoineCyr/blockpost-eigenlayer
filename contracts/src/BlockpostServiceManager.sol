@@ -8,15 +8,15 @@ import "@eigenlayer-middleware/src/unaudited/ECDSAStakeRegistry.sol";
 import "@openzeppelin-upgrades/contracts/utils/cryptography/ECDSAUpgradeable.sol";
 import "@eigenlayer/contracts/permissions/Pausable.sol";
 import {IRegistryCoordinator} from "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
-import "./IHelloWorldServiceManager.sol";
+import "./IBlockpostServiceManager.sol";
 
 /**
- * @title Primary entrypoint for procuring services from HelloWorld.
+ * @title Primary entrypoint for procuring services from Blockpost.
  * @author Eigen Labs, Inc.
  */
-contract HelloWorldServiceManager is
+contract BlockpostServiceManager is
     ECDSAServiceManagerBase,
-    IHelloWorldServiceManager,
+    IBlockpostServiceManager,
     Pausable
 {
     using BytesLib for bytes;
@@ -56,7 +56,7 @@ contract HelloWorldServiceManager is
         ECDSAServiceManagerBase(
             _avsDirectory,
             _stakeRegistry,
-            address(0), // hello-world doesn't need to deal with payments
+            address(0), // blockpost doesn't need to deal with payments
             _delegationManager
         )
     {}

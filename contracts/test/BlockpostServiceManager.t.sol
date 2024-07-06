@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.12;
 
-import {HelloWorldServiceManager} from "../src/HelloWorldServiceManager.sol";
+import {BlockpostServiceManager} from "../src/BlockpostServiceManager.sol";
 import {MockAVSDeployer} from "@eigenlayer-middleware/test/utils/MockAVSDeployer.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-contract HelloWorldTaskManagerTest is MockAVSDeployer {
-    HelloWorldServiceManager sm;
+contract BlockpostTaskManagerTest is MockAVSDeployer {
+    BlockpostServiceManager sm;
 
     address operator =
         address(uint160(uint256(keccak256(abi.encodePacked("operator")))));
@@ -16,7 +16,7 @@ contract HelloWorldTaskManagerTest is MockAVSDeployer {
 
     function setUp() public {
         _deployMockEigenLayerAndAVS();
-        sm = new HelloWorldServiceManager(
+        sm = new BlockpostServiceManager(
             address(avsDirectory),
             address(stakeRegistry),
             address(delegationMock)

@@ -9,7 +9,7 @@ import {IStrategyManager, IStrategy} from "@eigenlayer/contracts/interfaces/IStr
 import {StrategyBase} from "@eigenlayer/contracts/strategies/StrategyBase.sol";
 import {ECDSAStakeRegistry} from "@eigenlayer-middleware/src/unaudited/ECDSAStakeRegistry.sol";
 import {Quorum, StrategyParams} from "@eigenlayer-middleware/src/interfaces/IECDSAStakeRegistryEventsAndErrors.sol";
-import {HelloWorldServiceManager} from "../src/HelloWorldServiceManager.sol";
+import {BlockpostServiceManager} from "../src/BlockpostServiceManager.sol";
 import "@eigenlayer/test/mocks/EmptyContract.sol";
 import "../src/ERC20Mock.sol";
 import "forge-std/Script.sol";
@@ -24,14 +24,14 @@ contract HoleskyDeployer is Script, Utils {
     StrategyBase public erc20MockStrategy;
 
     // Hello World contracts
-    ProxyAdmin public helloWorldProxyAdmin;
-    PauserRegistry public helloWorldPauserReg;
-    
+    ProxyAdmin public blockpostProxyAdmin;
+    PauserRegistry public blockpostPauserReg;
+
     ECDSAStakeRegistry public stakeRegistryProxy;
     ECDSAStakeRegistry public stakeRegistryImplementation;
 
-    HelloWorldServiceManager public helloWorldServiceManagerProxy;
-    HelloWorldServiceManager public helloWorldServiceManagerImplementation;
+    BlockpostServiceManager public blockpostServiceManagerProxy;
+    BlockpostServiceManager public blockpostServiceManagerImplementation;
 
     function run() external {
         // Manually pasted addresses of Eigenlayer contracts
@@ -42,56 +42,64 @@ contract HoleskyDeployer is Script, Utils {
         address eigenLayerPauserRegAddr = 0x85Ef7299F8311B25642679edBF02B62FA2212F06;
         address baseStrategyImplementationAddr = 0x80528D6e9A2BAbFc766965E0E26d5aB08D9CFaF9;
 
-        IStrategyManager strategyManager = IStrategyManager(strategyManagerAddr);
-        IDelegationManager delegationManager = IDelegationManager(delegationManagerAddr);
+        IStrategyManager strategyManager = IStrategyManager(
+            strategyManagerAddr
+        );
+        IDelegationManager delegationManager = IDelegationManager(
+            delegationManagerAddr
+        );
         IAVSDirectory avsDirectory = IAVSDirectory(avsDirectoryAddr);
         ProxyAdmin eigenLayerProxyAdmin = ProxyAdmin(eigenLayerProxyAdminAddr);
-        PauserRegistry eigenLayerPauserReg = PauserRegistry(eigenLayerPauserRegAddr);
-        StrategyBase baseStrategyImplementation = StrategyBase(baseStrategyImplementationAddr);
+        PauserRegistry eigenLayerPauserReg = PauserRegistry(
+            eigenLayerPauserRegAddr
+        );
+        StrategyBase baseStrategyImplementation = StrategyBase(
+            baseStrategyImplementationAddr
+        );
 
-        address helloWorldCommunityMultisig = msg.sender;
-        address helloWorldPauser = msg.sender;
+        address blockpostCommunityMultisig = msg.sender;
+        address blockpostPauser = msg.sender;
 
         vm.startBroadcast();
-        _deployHelloWorldContracts(
+        _deployBlockpostContracts(
             delegationManager,
             avsDirectory,
             baseStrategyImplementation,
-            helloWorldCommunityMultisig,
-            helloWorldPauser
+            blockpostCommunityMultisig,
+            blockpostPauser
         );
         vm.stopBroadcast();
     }
 
-    function _deployHelloWorldContracts(
+    function _deployBlockpostContracts(
         IDelegationManager delegationManager,
         IAVSDirectory avsDirectory,
         IStrategy baseStrategyImplementation,
-        address helloWorldCommunityMultisig,
-        address helloWorldPauser
+        address blockpostCommunityMultisig,
+        address blockpostPauser
     ) internal {
         // Deploy proxy admin for ability to upgrade proxy contracts
-        helloWorldProxyAdmin = new ProxyAdmin();
+        blockpostProxyAdmin = new ProxyAdmin();
 
         // Deploy pauser registry
         {
             address[] memory pausers = new address[](2);
-            pausers[0] = helloWorldPauser;
-            pausers[1] = helloWorldCommunityMultisig;
-            helloWorldPauserReg = new PauserRegistry(
+            pausers[0] = blockpostPauser;
+            pausers[1] = blockpostCommunityMultisig;
+            blockpostPauserReg = new PauserRegistry(
                 pausers,
-                helloWorldCommunityMultisig
+                blockpostCommunityMultisig
             );
         }
 
         EmptyContract emptyContract = new EmptyContract();
 
         // First, deploy upgradeable proxy contracts that will point to the implementations.
-        helloWorldServiceManagerProxy = HelloWorldServiceManager(
+        blockpostServiceManagerProxy = BlockpostServiceManager(
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(helloWorldProxyAdmin),
+                    address(blockpostProxyAdmin),
                     ""
                 )
             )
@@ -100,7 +108,7 @@ contract HoleskyDeployer is Script, Utils {
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(helloWorldProxyAdmin),
+                    address(blockpostProxyAdmin),
                     ""
                 )
             )
@@ -112,54 +120,55 @@ contract HoleskyDeployer is Script, Utils {
                 delegationManager
             );
 
-            helloWorldProxyAdmin.upgrade(
-                TransparentUpgradeableProxy(payable(address(stakeRegistryProxy))),
+            blockpostProxyAdmin.upgrade(
+                TransparentUpgradeableProxy(
+                    payable(address(stakeRegistryProxy))
+                ),
                 address(stakeRegistryImplementation)
             );
         }
 
-        {   
+        {
             // Create an array with one StrategyParams element
             StrategyParams memory strategyParams = StrategyParams({
                 strategy: baseStrategyImplementation,
                 multiplier: 10_000
             });
 
-            StrategyParams[] memory quorumsStrategyParams = new StrategyParams[](1);
+            StrategyParams[]
+                memory quorumsStrategyParams = new StrategyParams[](1);
             quorumsStrategyParams[0] = strategyParams;
 
-            Quorum memory quorum = Quorum(
-                quorumsStrategyParams
-            );
+            Quorum memory quorum = Quorum(quorumsStrategyParams);
 
             // Sort the array (though it has only one element, it's trivially sorted)
             // If the array had more elements, you would need to ensure it is sorted by strategy address
 
-            helloWorldProxyAdmin.upgradeAndCall(
+            blockpostProxyAdmin.upgradeAndCall(
                 TransparentUpgradeableProxy(
                     payable(address(stakeRegistryProxy))
                 ),
                 address(stakeRegistryImplementation),
                 abi.encodeWithSelector(
                     ECDSAStakeRegistry.initialize.selector,
-                    address(helloWorldServiceManagerProxy),
+                    address(blockpostServiceManagerProxy),
                     1,
                     quorum
                 )
             );
         }
 
-        helloWorldServiceManagerImplementation = new HelloWorldServiceManager(
+        blockpostServiceManagerImplementation = new BlockpostServiceManager(
             address(avsDirectory),
             address(stakeRegistryProxy),
             address(delegationManager)
         );
         // Upgrade the proxy contracts to use the correct implementation contracts and initialize them.
-        helloWorldProxyAdmin.upgrade(
+        blockpostProxyAdmin.upgrade(
             TransparentUpgradeableProxy(
-                payable(address(helloWorldServiceManagerProxy))
+                payable(address(blockpostServiceManagerProxy))
             ),
-            address(helloWorldServiceManagerImplementation)
+            address(blockpostServiceManagerImplementation)
         );
 
         // WRITE JSON DATA
@@ -168,20 +177,20 @@ contract HoleskyDeployer is Script, Utils {
         string memory deployed_addresses = "addresses";
         vm.serializeAddress(
             deployed_addresses,
-            "HelloWorldServiceManagerProxy",
-            address(helloWorldServiceManagerProxy)
+            "BlockpostServiceManagerProxy",
+            address(blockpostServiceManagerProxy)
         );
         vm.serializeAddress(
             deployed_addresses,
-            "HelloWorldServiceManagerImplementation",
-            address(helloWorldServiceManagerImplementation)
+            "BlockpostServiceManagerImplementation",
+            address(blockpostServiceManagerImplementation)
         );
         vm.serializeAddress(
             deployed_addresses,
             "ECDSAStakeRegistry",
             address(stakeRegistryProxy)
         );
-        
+
         string memory deployed_addresses_output = vm.serializeAddress(
             deployed_addresses,
             "ECDSAStakeRegistryImplementation",
