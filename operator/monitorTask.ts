@@ -3,19 +3,19 @@ import * as dotenv from "dotenv";
 import { contractABI } from "./abis/contractABI";
 dotenv.config();
 
-if (!process.env.RPC_URL) {
-  throw new Error(`RPC_URL is undefined`);
+if (!process.env.HOLESKY_RPC_URL) {
+  throw new Error(`HOLESKY_RPC_URL is undefined`);
 }
-if (!process.env.PRIVATE_KEY) {
+if (!process.env.HOLESKY_PRIVATE_KEY) {
   throw new Error(`PRIVATE_KEY is undefined`);
 }
-if (!process.env.CONTRACT_ADDRESS) {
+if (!process.env.HOLESKY_CONTRACT_ADDRESS) {
   throw new Error(`CONTRACT_ADDRESS is undefined`);
 }
 
-const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-const contractAddress = process.env.CONTRACT_ADDRESS;
+const provider = new ethers.providers.JsonRpcProvider(process.env.HOLESKY_RPC_URL);
+const wallet = new ethers.Wallet(process.env.HOLESKY_PRIVATE_KEY, provider);
+const contractAddress = process.env.HOLESKY_CONTRACT_ADDRESS;
 const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 
 const signAndRespondToTask = async (
