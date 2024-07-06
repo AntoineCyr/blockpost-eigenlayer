@@ -16,6 +16,8 @@ interface BlockPostState {
   toSendIndex: string;
   toSendMnemonic: string;
   walletAddress: string;
+  status: string;
+  validated: string;
   contract?: ethers.Contract;
 }
 
@@ -30,14 +32,15 @@ export class BlockPost extends Component<BlockPostProps, BlockPostState> {
       toSendIndex: "",
       toSendMnemonic: "",
       walletAddress: "",
+      status: "",
+      validated: "",
     };
-    this.init;
+    setTimeout(this.init, 500);
   }
   init = async () => {
-    await this.initializeContract();
-    this.monitorNewTasks;
+    this.initializeContract();
   };
-  async initializeContract() {
+  initializeContract() {
     const { rpcUrl, privateKey, contractAddress } = this.props;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
@@ -46,39 +49,63 @@ export class BlockPost extends Component<BlockPostProps, BlockPostState> {
       contractABI,
       wallet
     );
-    this.setState({ contract: blockpostContract });
+    this.setState({
+      contract: blockpostContract,
+      status: "Contract imported",
+      walletAddress: wallet.address,
+    });
   }
-
-  monitorNewTasks = async () => {
-    this.state.contract!.on(
-      "NewTaskCreated",
-      async (taskIndex: number, task: any) => {
-        this.setState({
-          message: task.name,
-          index: taskIndex.toString(),
-        });
-      }
-    );
-  };
 
   async createTask(taskName: string) {
     try {
       // Send a transaction to the createNewTask function
       const tx = await this.state.contract!.createNewTask(taskName);
+      //const tx = await blockpostContract.createNewTask(taskName);
 
       // Wait for the transaction to be mined
       const receipt = await tx.wait();
+      const latestTaskNum = await this.state.contract!.latestTaskNum();
 
-      console.log(
-        `Transaction successful with hash: ${receipt.transactionHash}`
-      );
+      this.setState({
+        status: "Transaction succeeded",
+        message: taskName,
+        index: (latestTaskNum - 1).toString(),
+        validated: "No",
+      });
     } catch (error) {
       console.error("Error sending transaction:", error);
+      this.setState({
+        status: "Error sending transaction",
+        validated: "",
+        message: "",
+        index: "",
+      });
     }
   }
 
   async queryMessage(index: string) {
-    //TODO
+    try {
+      const message = await this.state.contract!.storedTask(index);
+      const validated =
+        (await this.state.contract!.allTaskResponses[this.state.walletAddress][
+          index
+        ].length) == 0
+          ? "Yes"
+          : "No";
+      this.setState({
+        message: message,
+        index: index,
+        status: "Successful query",
+        validated: validated,
+      });
+    } catch {
+      this.setState({
+        status: "Contract not initialized",
+        validated: "",
+        message: "",
+        index: "",
+      });
+    }
   }
 
   onToSendChanged = (e: ChangeEvent<HTMLInputElement>) => {
@@ -110,17 +137,20 @@ export class BlockPost extends Component<BlockPostProps, BlockPostState> {
 
   // The render function that draws the component at init and at state change
   render() {
-    const { toSend, index, message, toSendIndex } = this.state;
+    const { toSend, index, message, toSendIndex, status, validated } =
+      this.state;
     const { rpcUrl } = this.props;
     // The web page structure itself
     return (
       <div>
         <div className={styles.description}></div>
         <fieldset className={styles.card}>
-          <legend>Blockpost</legend>
+          <legend>Blockpost Eigenlayer</legend>
           <p>RpcUrl: {rpcUrl}</p>
           <p>Message: {message}</p>
           <p>Index: {index}</p>
+          <p>Validated: {validated}</p>
+          <p>Status: {status}</p>
         </fieldset>
         <fieldset className={styles.card}>
           <legend>Send</legend>
