@@ -1,0 +1,5 @@
+{
+  "testMatch": ["**/operator/tests/**"],
+  "preset": "ts-jest",
+  "testEnvironment": "node"
+}
