@@ -87,11 +87,12 @@ export class BlockPost extends Component<BlockPostProps, BlockPostState> {
     try {
       const message = await this.state.contract!.storedTask(index);
       const validated =
-        (await this.state.contract!.allTaskResponses[this.state.walletAddress][
+        (await this.state.contract!.allTaskResponses(
+          this.state.walletAddress,
           index
-        ].length) == 0
-          ? "Yes"
-          : "No";
+        )) == "0x"
+          ? "No"
+          : "Yes";
       this.setState({
         message: message,
         index: index,

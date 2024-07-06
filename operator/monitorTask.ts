@@ -18,7 +18,7 @@ const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const contractAddress = process.env.CONTRACT_ADDRESS;
 const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 
-export const signAndRespondToTask = async (
+const signAndRespondToTask = async (
   taskIndex: number,
   taskCreatedBlock: number,
   taskName: string,
@@ -44,10 +44,7 @@ const monitorNewTasks = async (
   wallet: ethers.Wallet,
   contract: ethers.Contract
 ) => {
-  console.log(wallet.address);
   await contract.createNewTask("EigenWorld");
-  const latestTaskNum = await contract.latestTaskNum();
-
   contract.on("NewTaskCreated", async (taskIndex: number, task: any) => {
     console.log(`New task detected: Hello, ${task.name}`);
     await signAndRespondToTask(
@@ -56,13 +53,9 @@ const monitorNewTasks = async (
       task.name,
       contract
     );
-    console.log(await contract.allTaskResponses[wallet.address][taskIndex]);
   });
 
   console.log("Monitoring for new tasks...");
-  console.log(latestTaskNum);
-  console.log((latestTaskNum - 1).toString());
-  console.log(await contract.storedTask(0));
 };
 
 const main = async () => {

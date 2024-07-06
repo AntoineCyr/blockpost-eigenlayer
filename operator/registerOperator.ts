@@ -51,8 +51,6 @@ const avsDirectory = new ethers.Contract(
 );
 
 const registerOperator = async () => {
-  console.log("check");
-
   const tx1 = await delegationManager.registerAsOperator(
     {
       earningsReceiver: wallet.address,
@@ -91,8 +89,8 @@ const registerOperator = async () => {
   operatorSignature.signature = ethers.utils.joinSignature(signature);
 
   const tx2 = await registryContract.registerOperatorWithSignature(
-    wallet.address,
-    operatorSignature
+    operatorSignature,
+    wallet.address
   );
   await tx2.wait();
   console.log("Operator registered on AVS successfully");
