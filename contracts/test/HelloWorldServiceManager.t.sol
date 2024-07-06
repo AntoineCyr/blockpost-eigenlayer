@@ -37,8 +37,5 @@ contract HelloWorldTaskManagerTest is MockAVSDeployer {
 
         //wrong index
         assertEq(sm.storedTask(1), "");
-
-        //respondToTask TODO
-        //sm.respondToTask(task, 0, operator);
     }
 }

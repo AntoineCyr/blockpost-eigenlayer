@@ -71,6 +71,7 @@ contract HelloWorldServiceManager is
 
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[latestTaskNum] = keccak256(abi.encode(newTask));
+        storedTask[latestTaskNum] = name;
         emit NewTaskCreated(latestTaskNum, newTask);
         latestTaskNum = latestTaskNum + 1;
     }
