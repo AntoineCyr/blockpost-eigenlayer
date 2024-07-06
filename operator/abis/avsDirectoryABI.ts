@@ -90,13 +90,21 @@ export const avsDirectoryABI = [
     type: "function",
     name: "initialize",
     inputs: [
-      { name: "initialOwner", type: "address", internalType: "address" },
+      {
+        name: "initialOwner",
+        type: "address",
+        internalType: "address",
+      },
       {
         name: "_pauserRegistry",
         type: "address",
         internalType: "contract IPauserRegistry",
       },
-      { name: "initialPausedStatus", type: "uint256", internalType: "uint256" },
+      {
+        name: "initialPausedStatus",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -122,7 +130,11 @@ export const avsDirectoryABI = [
     type: "function",
     name: "pause",
     inputs: [
-      { name: "newPausedStatus", type: "uint256", internalType: "uint256" },
+      {
+        name: "newPausedStatus",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -153,7 +165,11 @@ export const avsDirectoryABI = [
     name: "pauserRegistry",
     inputs: [],
     outputs: [
-      { name: "", type: "address", internalType: "contract IPauserRegistry" },
+      {
+        name: "",
+        type: "address",
+        internalType: "contract IPauserRegistry",
+      },
     ],
     stateMutability: "view",
   },
@@ -207,7 +223,11 @@ export const avsDirectoryABI = [
     type: "function",
     name: "unpause",
     inputs: [
-      { name: "newPausedStatus", type: "uint256", internalType: "uint256" },
+      {
+        name: "newPausedStatus",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -223,7 +243,12 @@ export const avsDirectoryABI = [
     type: "event",
     name: "AVSMetadataURIUpdated",
     inputs: [
-      { name: "avs", type: "address", indexed: true, internalType: "address" },
+      {
+        name: "avs",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
       {
         name: "metadataURI",
         type: "string",
@@ -237,7 +262,12 @@ export const avsDirectoryABI = [
     type: "event",
     name: "Initialized",
     inputs: [
-      { name: "version", type: "uint8", indexed: false, internalType: "uint8" },
+      {
+        name: "version",
+        type: "uint8",
+        indexed: false,
+        internalType: "uint8",
+      },
     ],
     anonymous: false,
   },
@@ -251,7 +281,12 @@ export const avsDirectoryABI = [
         indexed: true,
         internalType: "address",
       },
-      { name: "avs", type: "address", indexed: true, internalType: "address" },
+      {
+        name: "avs",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
       {
         name: "status",
         type: "uint8",
