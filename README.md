@@ -1,109 +1,93 @@
-# Hello World AVS
+# BlockPost AVS
 
-Welcome to the Hello World AVS.
+**BlockPost** is built with the Eigenlayer SDK.
 
-This project shows you the simplest functionality you can expect from an AVS.
+## Getting Started
 
-It will give you a concrete understanding of the basic components.
+To get started run:
 
-![hello-world-png](./assets/hello-world-diagram.png)
-
-There are 5 steps to this AVS:
-- AVS consumer requests a "Hello World" message to be generated and signed
-- AVS takes on the request by emitting an event for operators to pick up the request
-- any operator who is staked to serve this AVS takes this request, generates this message and signs it
-- the operator submits this message with their signature back to the AVS
-- *if the operator is in fact registered to the AVS and has the minimum needed stake, the submission is accepted*
-
-That's it. This simple flow highlights some of the core mechanics of how AVSs work.
-
-Where additional sophistication with AVSs come into the picture:
-- the nature of the request is more sophisticated than generating a constant string
-- the operators might need to coordinate with each other
-- the type of signature is different based on the constraints of the service
-- the type and amount of security used to secure the AVS
-- and so on...
-
-## Quick Start
-
-### Dependencies
-
-1. [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-2. [Foundry](https://getfoundry.sh/)
-3. [Docker](https://www.docker.com/get-started/)
-   * Make sure Docker is running
-
-
-Following NodeJS packages:
-1. tcs
-2. ethers
-
-### Steps
-
-#### Typescript
-
-1. Run `yarn install`
-2. Run `cp .env.local .env`
-3. Run `make start-chain-with-contracts-deployed`
-    * This will build the contracts, start an Anvil chain, deploy the contracts to it, and leaves the chain running in the current terminal
-4. Open new terminal tab and run `make start-operator`
-    * This will compile the AVS software and start monitering new tasks
-5. Open new terminal tab and run `make spam-tasks` (Optional)
-    * This will spam the AVS with random names every 15 seconds
-
-#### Rust lang
-
-
-##### Anvil 
-
-1. Run `make start-chain-with-contracts-deployed`
-    * This will build the contracts, start an Anvil chain, deploy the contracts to it, and leaves the chain running in the current terminal
-
-2. Run `make start-rust-operator`
-
-3. Run `make spam-rust-tasks`
-
-Tests are supported in anvil only . Make sure to run the 1st command before running the  tests:
-
-```
-cargo test --workspace
+```sh
+yarn install
+cp .env.local .env
 ```
 
+### Deploy the contract
 
-##### Holesky Testnet
+The blockchain is currently deployed on testnet HOLESKY, and the smart contract Blockpost stored in Anvil.
+The Makefile has additionnal to build the contracts and redeploy them to Anvil if needed.
 
-| Contract Name               | Holesky Address                                   |
-| -------------               | -------------                                     |
-| Hello World Service Manager | [0x3361953F4a9628672dCBcDb29e91735fb1985390](https://holesky.etherscan.io/address/0x3361953F4a9628672dCBcDb29e91735fb1985390)    |
-| Delegation Manager          | [0xA44151489861Fe9e3055d95adC98FbD462B948e7](https://holesky.etherscan.io/address/0xA44151489861Fe9e3055d95adC98FbD462B948e7)                                           |
-| Avs Directory               | [0x055733000064333CaDDbC92763c58BF0192fFeBf](https://holesky.etherscan.io/address/0x055733000064333CaDDbC92763c58BF0192fFeBf)      |
+### Web Frontend
 
-You don't need to run any script for holesky testnet.
+To set up and run the web frontend follow these steps:
 
-1. Use the HOLESKY_ namespace env parameters in the code , instead of normal parameters.
+```sh
+make install-client
+make run-client
+```
 
-2. Run `make start-rust-operator`
+### Interacting with the Blockchain
 
-3. Run `make spam-rust-tasks `
+Open a web browser and navigate to http://localhost:3000.
 
+# Send a Message:
 
-## Extensions
+Enter any message in the Send box to send it to the blockchain. It takes a few seconds
+to reach the blockchain, be patient!
 
-- Operator needs a minimum stake amount to make submissions
-- Add another strategy to the AVS
-- Operator must respond within a certain number of blocks
+# Query a Message:
 
-## Deployment on Holesky
+Enter any index in the Query box to query a specific message from the blockchain.
 
-To deploy the Hello World AVS contracts to the Holesky network, follow these steps:
+### Validate Messages
 
-1. Ensure you have the necessary RPC URL and private key for the Holesky network.
-2. Run the deployment script using Foundry:
-    ```bash
-    forge script script/HoleskyDeployer.s.sol:HoleskyDeployer --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvv
-    ```
-    Replace `$RPC_URL` with your Holesky RPC URL and `$PRIVATE_KEY` with your private key.
+To validate messages sent in the front end, open a new terminal and run:
 
-## Adding a New Strategy
+```sh
+make start-operator
+```
 
-To add a new strategy to the Hello World AVS, follow the guide provided in [`AddNewStrategy.md`](https://github.com/Layr-Labs/hello-world-avs/blob/master/AddNewStrategy.md). This guide walks you through the necessary steps to add and whitelist a new strategy for the AVS.
+The new messages that you send in the front end will be validated by your operator.
+Query the latest message you sent to verify if it is validated.
+
+### Tests
+
+# Onchain tests
+
+```sh
+make tests-contract
+```
+
+# Operator tests
+
+You need to run anvil to make the test work.
+
+First run:
+
+```sh
+make start-chain-with-contracts-deployed
+```
+
+On a new terminal:
+
+```sh
+make register-operator
+make tests-offchain
+```
+
+### Design choices
+# storedTask type
+I decided to go with a mapping over an array.
+Both do not have meaningfull differences, as the array would be acting like a mapping.
+Since we are always inserting at the and using an index for the lookup, both operations would have O(1) time complexity,
+just like a mapping.
+Both will consume similar space as well.
+Since the array would be acting like a mapping, I kept the contract convention and went for the mapping,
+just like allTaskHashes and allTaskResponses.
+
+# When storing
+A choice had to be made between storing the message on task creation, or when responding to the task.
+I decided to store the message on task creation, because we are able to query allTaskResponses to see if the task has been validated.
+Overall it just stores the information in a faster way.
+
+### Limitations
+If you have an error sending a transaction, refresh the webpage.

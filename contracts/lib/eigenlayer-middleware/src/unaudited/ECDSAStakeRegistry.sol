@@ -370,10 +370,10 @@ contract ECDSAStakeRegistry is
         int256 delta = _updateOperatorWeight(_operator);
         _updateTotalWeight(delta);
         _updateOperatorSigningKey(_operator, _signingKey);
-        IServiceManager(_serviceManager).registerOperatorToAVS(
+        /*IServiceManager(_serviceManager).registerOperatorToAVS(
             _operator,
             _operatorSignature
-        );
+        );*/
         emit OperatorRegistered(_operator, _serviceManager);
     }
 
