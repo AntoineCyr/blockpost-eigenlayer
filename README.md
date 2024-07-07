@@ -2,6 +2,13 @@
 
 **BlockPost** is built with the Eigenlayer SDK.
 
+## Dependencies
+
+1. [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+2. [Foundry](https://getfoundry.sh/)
+3. [Docker](https://www.docker.com/get-started/)
+   - Make sure Docker is running
+
 ## Getting Started
 
 To get started run:
@@ -75,7 +82,9 @@ make tests-offchain
 ```
 
 ## Design choices
+
 ### storedTask type
+
 I decided to go with a mapping over an array.
 Both do not have meaningfull differences, as the array would be acting like a mapping.
 Since we are always inserting at the and using an index for the lookup, both operations would have O(1) time complexity,
@@ -85,9 +94,11 @@ Since the array would be acting like a mapping, I kept the contract convention a
 just like allTaskHashes and allTaskResponses.
 
 ### When storing
+
 A choice had to be made between storing the message on task creation, or when responding to the task.
 I decided to store the message on task creation, because we are able to query allTaskResponses to see if the task has been validated.
 Overall it just stores the information in a faster way.
 
 ## Limitations
+
 If you have an error sending a transaction, refresh the webpage.
